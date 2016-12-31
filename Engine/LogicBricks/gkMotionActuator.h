@@ -54,6 +54,9 @@ protected:
 	int m_type;
 	MotionData m_loc, m_rot, m_force, m_torque, m_linv, m_angv;
 	bool m_linvInc;
+	bool m_characterMotion;
+	bool m_characterJump;
+	bool m_jumping;
 	gkScalar m_damping, m_dampIncr;
 	gkQuaternion m_quat;
 
@@ -71,6 +74,8 @@ public:
 	GK_INLINE void setType(int v)                   {m_type = v;}
 	GK_INLINE void setDamping(gkScalar v)           {m_damping = v;}
 	GK_INLINE void setIncrementalVelocity(bool v)   {m_linvInc = v;}
+	GK_INLINE void setCharacterMotion(bool v)       { m_characterMotion = v; }
+	GK_INLINE void setCharacterJump(bool v)         { m_characterJump = v; }
 
 
 	GK_INLINE void setTranslation(const gkVector3& v, bool local)
@@ -125,6 +130,8 @@ public:
 	GK_INLINE const gkVector3& getAngularVelocity(void)     const {return m_angv.vec;}
 	GK_INLINE gkScalar         getDamping(void)             const {return m_damping;}
 	GK_INLINE bool             getIncrementalVelocity(void) const {return m_linvInc;}
+	GK_INLINE bool             getCharacterMotion(void)     const { return m_characterMotion; }
+	GK_INLINE bool             getCharacterJump(void)       const { return m_characterJump; }
 };
 
 
