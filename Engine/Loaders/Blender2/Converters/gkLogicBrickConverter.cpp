@@ -215,6 +215,8 @@ void gkLogicLoader::convertObject(Blender::Object* bobj, gkGameObject* gobj, gkL
 
 				ma->setIncrementalVelocity((objact->flag & ACT_ADD_LIN_VEL) != 0);
 				ma->setDamping(gkScalar(objact->damping));
+				ma->setCharacterMotion((objact->flag & ACT_ADD_CHAR_LOC) != 0);
+				ma->setCharacterJump((objact->flag & ACT_CHAR_JUMP) != 0);
 			}
 			break;
 		case ACT_ACTION:
