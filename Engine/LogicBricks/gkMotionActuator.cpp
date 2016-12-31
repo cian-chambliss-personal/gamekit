@@ -27,12 +27,14 @@
 #include "gkMotionActuator.h"
 #include "gkGameObject.h"
 #include "gkRigidBody.h"
-
+#include "gkCharacter.h"
+#include "btBulletDynamicsCommon.h"
+#include "BulletDynamics/Character/btKinematicCharacterController.h"
 
 
 gkMotionActuator::gkMotionActuator(gkGameObject* object, gkLogicLink* link, const gkString& name)
 	:       gkLogicActuator(object, link, name),
-	        m_type(0), m_linvInc(false), m_damping(1.f), m_dampIncr(0.f)
+	        m_type(0), m_linvInc(false) , m_characterMotion(false) , m_characterJump(false) , m_damping(1.f), m_dampIncr(0.f)
 {
 }
 
@@ -115,5 +117,24 @@ void gkMotionActuator::execute(void)
 					body->setAngularVelocity(m_angv.vec * val , m_angv.local ? TRANSFORM_LOCAL : TRANSFORM_PARENT);
 			}
 		}
+		//if (m_characterMotion) {
+			if (m_characterJump) {
+				gkCharacter* character = m_object->getAttachedCharacter();
+				if (character)
+				{
+					if (m_jumping) {
+						if(character->getCharacterController()->onGround() ) {
+							m_jumping = false;
+						}
+					} else {
+						m_jumping = true;
+						//const gkGameObjectProperties& props = m_object->getProperties();
+						//const gkPhysicsProperties& phy = props.m_physics;
+						//character->getCharacterController()->setJumpSpeed(phy.m_mass * jumpSpeed);
+						character->getCharacterController()->jump();
+					}
+				}
+			}
+		//}
 	}
 }
