@@ -576,6 +576,9 @@ void	btQuantizedBvh::walkStacklessQuantizedTreeAgainstRay(btNodeOverlapCallback*
 	btScalar lambda_max = 1.0;
 
 #ifdef RAYAABB2
+	if (rayTarget == raySource ) { // CSC - test for 0 length vector - and bail
+		return;
+	}
 	btVector3 rayDirection = (rayTarget-raySource);
 	rayDirection.normalize ();
 	lambda_max = rayDirection.dot(rayTarget-raySource);
