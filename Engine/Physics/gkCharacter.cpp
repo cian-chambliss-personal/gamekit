@@ -138,7 +138,7 @@ void gkCharacter::destroy(void)
 
 		GK_ASSERT(m_object->isInActiveLayer());
 
-		m_owner->getBulletWorld()->removeAction(m_character);
+		m_owner->getBulletWorld()->removeAction(this); // CSC was m_character); - this is a mismatch
 		m_owner->getBulletWorld()->removeCollisionObject(m_collisionObject);
 
 		delete m_shape;
