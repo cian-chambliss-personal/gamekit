@@ -36,10 +36,12 @@ class btPairCachingGhostObject;
 class btKinematicCharacterController;
 class btTriangleMesh;
 class gkDynamicsWorld;
-
+class btGhostPairCallback;
 
 class gkGhost : public gkPhysicsController
 {
+protected:
+	btGhostPairCallback*        m_ghostPairCallback;
 public:
 
 	gkGhost(gkGameObject* object, gkDynamicsWorld* owner);

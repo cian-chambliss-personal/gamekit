@@ -38,7 +38,7 @@
 
 
 gkGhost::gkGhost(gkGameObject* object, gkDynamicsWorld* owner)
-	: gkPhysicsController(object, owner)
+	: gkPhysicsController(object, owner) , m_ghostPairCallback(0)
 {
 }
 
@@ -47,6 +47,14 @@ gkGhost::gkGhost(gkGameObject* object, gkDynamicsWorld* owner)
 
 gkGhost::~gkGhost()
 {
+	if (m_collisionObject)
+	{
+		delete m_collisionObject;
+	}
+	if (m_ghostPairCallback)
+	{
+		delete m_ghostPairCallback;
+	}	
 }
 
 
@@ -78,7 +86,8 @@ void gkGhost::create(void)
 	m_collisionObject->setWorldTransform(trans.toTransform());
 	btDynamicsWorld* dyn = getOwner();
 	dyn->addCollisionObject(m_collisionObject);
-	dyn->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+	m_ghostPairCallback = new btGhostPairCallback();
+	dyn->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(m_ghostPairCallback);
 
 
 

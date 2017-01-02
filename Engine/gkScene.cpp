@@ -729,6 +729,16 @@ void gkScene::_createPhysicsObject(gkGameObject* obj)
 		obj->attachCharacter(character);
 		gkLogger::write("Attached Character... ",true );
 	}
+	else if (props.isGhost()) // CSC ... + maybe test for object has event
+	{
+		gkGhost* con = m_physicsWorld->createGhost(obj);
+		obj->attachGhost(con);
+		if (con->isStaticObject())
+		{
+			m_staticControllers.insert(con);
+			m_limits.merge(con->getAabb());
+		}
+	}
 	else
 	{
 		gkRigidBody* con = m_physicsWorld->createRigidBody(obj);
