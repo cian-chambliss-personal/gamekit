@@ -64,6 +64,7 @@
 #define ACT_PARENT                               20
 #define ACT_SHAPEACTION                          21
 #define ACT_STATE                                22
+#define ACT_STEERING                             24
 #define ACT_SHOW                                 1
 #define ACT_DEL                                  2
 #define ACT_NEW                                  4
@@ -201,6 +202,14 @@
 #define ACT_PARENT_REMOVE                        1
 #define ACT_PARENT_COMPOUND                      1
 #define ACT_PARENT_GHOST                         2
+#define ACT_STEERING_SEEK                        0
+#define ACT_STEERING_FLEE                        1
+#define ACT_STEERING_PATHFOLLOWING               2
+#define ACT_STEERING_SELFTERMINATED              1
+#define ACT_STEERING_ENABLEVISUALIZATION         2
+#define ACT_STEERING_AUTOMATICFACING             4
+#define ACT_STEERING_NORMALUP                    8
+#define ACT_STEERING_LOCKZVEL                   16
 #define BOIDRULE_CURRENT                         1
 #define BOIDRULE_IN_AIR                          4
 #define BOIDRULE_ON_LAND                         8

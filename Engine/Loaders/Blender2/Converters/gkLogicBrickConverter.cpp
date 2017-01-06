@@ -544,7 +544,37 @@ void gkLogicLoader::convertObject(Blender::Object* bobj, gkGameObject* gobj, gkL
 				sa->setSoundFile(GKB_IDNAME(bsa->sound));
 #endif
 			} break;
-
+			case ACT_STEERING:
+			{
+#if OGREKIT_COMPILE_OPENSTEER
+			gkSteeringActuator* sa = new gkSteeringActuator(gobj, lnk, bact->name);
+			la = sa;
+			Blender::bSteeringActuator* bsa = (Blender::bSteeringActuator*)bact->data;
+			float dist = bsa->dist;
+			dist = dist;
+			if (bsa->navmesh) {
+				sa->setNavMeshObject(gkString(bsa->navmesh->id.name));
+			}
+			if( bsa->target) {
+				sa->setTargetObject(gkString(bsa->target->id.name));
+			}
+			switch (bsa->type) {
+			case ACT_STEERING_SEEK: sa->setMode(gkSteeringActuator::Mode::SA_SEEK); break;
+			case ACT_STEERING_FLEE: sa->setMode(gkSteeringActuator::Mode::SA_FLEE); break;
+			case ACT_STEERING_PATHFOLLOWING: sa->setMode(gkSteeringActuator::Mode::SA_WANDER); break;
+			}
+			sa->setDistance(bsa->dist);
+			sa->setVelocity(bsa->velocity);
+			sa->setAcceleration(bsa->acceleration);
+			sa->setTurnSpeed(bsa->turnspeed);
+			sa->setUpdateTime(bsa->updateTime);
+			sa->setSelfTerminating((bsa->flag & ACT_STEERING_SELFTERMINATED) != 0);
+			sa->setEnableVisualization((bsa->flag &ACT_STEERING_ENABLEVISUALIZATION) != 0);
+			sa->setAutomaticFacing((bsa->flag &ACT_STEERING_AUTOMATICFACING) != 0);
+			sa->setNormalUp((bsa->flag &ACT_STEERING_NORMALUP) != 0);
+			sa->setLockZVelocity((bsa->flag &ACT_STEERING_LOCKZVEL) != 0);			
+#endif
+			} break;
 		}
 
 

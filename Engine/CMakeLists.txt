@@ -469,7 +469,6 @@ set(Logic_SOURCE
 	LogicBricks/gkSoundActuator.cpp
 )
 
-
 set(Logic_HEADER
 	LogicBricks/gkActionActuator.h
 	LogicBricks/gkActuatorSensor.h
@@ -507,6 +506,15 @@ set(Logic_HEADER
 	LogicBricks/gkPropertyActuator.h
 	LogicBricks/gkSoundActuator.h
 )
+
+if (OGREKIT_COMPILE_OPENSTEER)
+	list(APPEND Logic_SOURCE 
+		LogicBricks/gkSteeringActuator.cpp
+	)
+	list(APPEND Logic_HEADER 
+		LogicBricks/gkSteeringActuator.h
+	)
+endif()
 
 if(APPLE)
 	source_group(LogicBricks FILES ${Logic_HEADER} ${Logic_SOURCE})

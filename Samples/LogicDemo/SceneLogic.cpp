@@ -72,7 +72,7 @@ SceneLogic::SceneLogic(gkScene* pScene)
 	pScene->setNavMeshData(m_navMeshData);
 
 	m_navMeshData->createInstances();
-}
+} 
 
 SceneLogic::~SceneLogic()
 {
