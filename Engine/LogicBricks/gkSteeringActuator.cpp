@@ -59,6 +59,7 @@ public:
 	gkLogicBlockAiDefinition m_def;
 	// Nav Mesh context data
 	PNAVMESHDATA             m_navMeshData;
+	PDT_NAV_MESH             m_navMesh;
 	// Steering Object context data
 	gkGameObject*     m_trackingObject;
 	gkSteeringObject* m_steeringObject;
@@ -93,6 +94,7 @@ void gkLogicBlockAiContextImpl::Seek() {
 	}
 	m_steeringCapture->setMaxForce(m_def.m_acceleration);
 	m_steeringCapture->reset();
+	m_steeringCapture->setGoalPosition(m_def.m_targetObj->getPosition());
 	m_steeringObject = m_steeringCapture;
 }
 
@@ -112,6 +114,7 @@ void gkLogicBlockAiContextImpl::PathFollowing() {
 			256,
 			0.003f
 		);
+		m_steeringFollowing->setNavMesh(m_navMesh);
 	}
 	m_steeringFollowing->setGoalRadius(m_def.m_dist);
 	m_steeringFollowing->setMaxForce(m_def.m_acceleration);
@@ -129,7 +132,7 @@ void gkLogicBlockAiContextImpl::Wander() {
 			SIDE,
 			0.3f,
 			5
-		);
+		);		
 	}	
 	m_steeringWander->setGoalRadius(m_def.m_dist);
 	m_steeringWander->setMaxForce(m_def.m_acceleration);
@@ -137,7 +140,7 @@ void gkLogicBlockAiContextImpl::Wander() {
 	m_steeringObject = m_steeringWander;
 }
 
-gkLogicBlockAiContextImpl::gkLogicBlockAiContextImpl() : m_navMeshData(0), m_trackingObject(0), m_steeringObject(0)
+gkLogicBlockAiContextImpl::gkLogicBlockAiContextImpl() : m_navMeshData(0), m_navMesh(0), m_trackingObject(0), m_steeringObject(0)
 , m_steeringCapture(0), m_steeringFollowing(0), m_steeringWander(0) {
 }
 gkLogicBlockAiContextImpl::~gkLogicBlockAiContextImpl() {
@@ -152,6 +155,8 @@ gkLogicBlockAiContextImpl::~gkLogicBlockAiContextImpl() {
 void gkLogicBlockAiContextImpl::CreateNavMesh(gkGameObject *navMeshObj) {
 	m_navMeshData = PNAVMESHDATA(new gkNavMeshData(navMeshObj->getOwner()));
 	m_navMeshData->singleNavMeshCreate(navMeshObj);
+	gkRecast::Config config;
+	m_navMesh = gkRecast::createNavMesh(PMESHDATA(m_navMeshData->cloneData()), config);
 }
 
 void gkLogicBlockAiContextImpl::updateAIDefinition(gkLogicBlockAiDefinition &def) {
@@ -242,8 +247,10 @@ void gkSteeringActuator::execute(void)
 	// Handle navigation....
 	gkLogicBlockAiContextImpl *aiContext = dynamic_cast<gkLogicBlockAiContextImpl *>(m_object->_getLogicBlockAiContext());
 	if (!aiContext) {
+		gkLogicBlockAiContextImpl *navPath = dynamic_cast<gkLogicBlockAiContextImpl *>(m_def.m_navMeshObj->_getLogicBlockAiContext());		
 		aiContext = new gkLogicBlockAiContextImpl();
 		aiContext->m_trackingObject = m_object;
+		aiContext->m_navMesh = navPath->m_navMesh;
 		m_object->_setLogicBlockAiContext(aiContext);
 		gkLogicBlockAiManager * lbmanager = m_scene->getLogicBlockAiManager();
 		lbmanager->trackLogicBlockAi(aiContext);
