@@ -38,6 +38,8 @@
 #include <OgreMovableObject.h>
 
 class gkCurve;
+class gkLogicBlockAiContext;
+
 
 class gkGameObject : public gkInstancedObject
 {
@@ -231,7 +233,8 @@ public:
 
 	GK_INLINE void setNavData(const NavMeshData& data) { m_navMeshData = data; }
 
-	GK_INLINE void resetNavData() { m_navMeshData = NavMeshData(); }
+	GK_INLINE void resetNavData() { m_navMeshData = NavMeshData(); }	
+	
 
 	void GK_INLINE recalcNavData(int i, int n)
 	{
@@ -301,6 +304,9 @@ public:
 
 	void _setBoneTransform(gkTransformState* transform);
 	gkTransformState* _getBoneTransform() { return m_boneTransform; }
+
+	gkLogicBlockAiContext *_getLogicBlockAiContext() { return m_logicBlockAiContext;  }
+	void _setLogicBlockAiContext(gkLogicBlockAiContext *gsc) { m_logicBlockAiContext = gsc;  }
 protected:
 
 
@@ -360,8 +366,7 @@ protected:
 	Animations                  m_actions;
 
 	gkTransformState* m_boneTransform;
-
-
+	gkLogicBlockAiContext *   m_logicBlockAiContext;	
 
 	virtual void createInstanceImpl(void);
 	virtual void destroyInstanceImpl(void);
@@ -371,8 +376,7 @@ protected:
 
 
 
-	void sendNotification(const Notifier::Event& e);
-
+	void sendNotification(const Notifier::Event& e);	
 private:
 
 	NavMeshData m_navMeshData;

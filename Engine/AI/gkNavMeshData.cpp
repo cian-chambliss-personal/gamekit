@@ -38,14 +38,19 @@
 typedef gkGameObject::NavMeshData NavMeshData;
 
 gkNavMeshData::gkNavMeshData(gkScene* scene)
-	: m_object(0), m_scene(scene), m_hasChanged(false)
+	: m_object(0), m_scene(scene), m_hasChanged(false) , m_singleMesh(false)
 {
 	GK_ASSERT(m_scene);
 }
 
 gkNavMeshData::~gkNavMeshData()
 {
-	destroyInstances();
+	if (m_singleMesh) {
+		destroyInstance(m_object);
+	}
+	else {
+		destroyInstances();
+	}
 }
 
 void gkNavMeshData::destroyInstance(gkGameObject* pObj)
@@ -89,6 +94,7 @@ void gkNavMeshData::destroyInstance(gkGameObject* pObj)
 	}
 
 	pObj->resetNavData();
+	if (m_singleMesh) return;
 
 	gkGameObjectSet& objs = m_scene->getInstancedObjects();
 	gkGameObjectSet::Iterator it = objs.iterator();
@@ -113,6 +119,20 @@ void gkNavMeshData::updateOrCreate(gkGameObject* pObj)
 	}
 
 	m_hasChanged = true;
+}
+
+
+void gkNavMeshData::singleNavMeshCreate(gkGameObject* pObj)
+{
+	m_object = pObj;
+
+	if (m_object && m_object->isInstanced())
+	{
+		AddCollisionObj();
+	}
+
+	m_hasChanged = true;
+	m_singleMesh = true;
 }
 
 void gkNavMeshData::destroyInstances()

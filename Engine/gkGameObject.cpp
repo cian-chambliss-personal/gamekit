@@ -53,6 +53,7 @@
 #include "gkVariable.h"
 
 #include "gkAnimationManager.h"
+#include "gkLogicBlockAiManager.h"
 
 //using namespace Ogre;
 
@@ -71,7 +72,8 @@ gkGameObject::gkGameObject(gkInstancedManager* creator, const gkResourceName& na
 	     m_flags(0),
 	     m_actionBlender(0),
 	     m_cloneToScene(0),
-	     m_boneTransform(0)
+	     m_boneTransform(0),
+		 m_logicBlockAiContext(0)
 {
 	m_life.tick = 0;
 	m_life.timeToLive = 0;
@@ -82,12 +84,13 @@ gkGameObject::~gkGameObject()
 {
 	clearVariables();
 
-
 	if (m_bricks)
 	{
 		m_bricks->getLogicManager()->destroy(m_bricks);
 		m_bricks = 0;
 	}
+	if (m_logicBlockAiContext)
+		m_logicBlockAiContext->dispose();
 
 	if(m_actionBlender)
 		delete m_actionBlender;
@@ -1341,3 +1344,4 @@ void gkGameObject::_setBoneTransform(gkTransformState* transform)
 	gkLogger::write(getName()+" - Set Bonetransform loc:("+gkToString(transform->loc)+") rot("+gkToString(transform->rot)+") scl("+gkToString(transform->scl)+")");
 	m_boneTransform = transform;
 }
+

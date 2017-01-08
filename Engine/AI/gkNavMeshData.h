@@ -52,6 +52,7 @@ public:
 
 	void destroyInstance(gkGameObject* pObj);
 	void updateOrCreate(gkGameObject* pObj);
+	void singleNavMeshCreate(gkGameObject* pObj);
 	void destroyInstances();
 	void createInstances();
 
@@ -92,6 +93,8 @@ private:
 	gkScene* m_scene;
 
 	bool m_hasChanged;
+
+	bool m_singleMesh;
 };
 
 

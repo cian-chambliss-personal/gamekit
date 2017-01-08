@@ -553,15 +553,15 @@ void gkLogicLoader::convertObject(Blender::Object* bobj, gkGameObject* gobj, gkL
 			float dist = bsa->dist;
 			dist = dist;
 			if (bsa->navmesh) {
-				sa->setNavMeshObject(gkString(bsa->navmesh->id.name));
+				sa->setNavMeshObject(gkString(GKB_IDNAME(bsa->navmesh)));
 			}
 			if( bsa->target) {
-				sa->setTargetObject(gkString(bsa->target->id.name));
+				sa->setTargetObject(gkString(GKB_IDNAME(bsa->target)));
 			}
 			switch (bsa->type) {
-			case ACT_STEERING_SEEK: sa->setMode(gkSteeringActuator::Mode::SA_SEEK); break;
-			case ACT_STEERING_FLEE: sa->setMode(gkSteeringActuator::Mode::SA_FLEE); break;
-			case ACT_STEERING_PATHFOLLOWING: sa->setMode(gkSteeringActuator::Mode::SA_WANDER); break;
+			case ACT_STEERING_SEEK: sa->setMode(gkLogicBlockAiDefinition::Mode::SA_SEEK); break;
+			case ACT_STEERING_FLEE: sa->setMode(gkLogicBlockAiDefinition::Mode::SA_FLEE); break;
+			case ACT_STEERING_PATHFOLLOWING: sa->setMode(gkLogicBlockAiDefinition::Mode::SA_PATH_FOLLOWING); break;
 			}
 			sa->setDistance(bsa->dist);
 			sa->setVelocity(bsa->velocity);

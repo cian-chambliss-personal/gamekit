@@ -45,6 +45,7 @@
 #endif
 
 class gkCurve;
+class gkLogicBlockAiManager;
 
 class gkScene : public gkInstancedObject
 {
@@ -226,7 +227,7 @@ public:
 #ifdef OGREKIT_USE_PROCESSMANAGER
 	gkProcessManager* getProcessManager(void);
 #endif
-
+	gkLogicBlockAiManager*  getLogicBlockAiManager();
 private:
 
 	void postCreateInstanceImpl(void);
@@ -283,6 +284,7 @@ private:
 #ifdef OGREKIT_USE_PROCESSMANAGER
 	gkProcessManager*		m_processManager;
 #endif
+	gkLogicBlockAiManager*  m_logicBlockAiManager;
 };
 
 #endif//_gkSceneObject_h_
