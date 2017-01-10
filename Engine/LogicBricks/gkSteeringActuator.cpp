@@ -32,6 +32,7 @@
 #include "gkSteeringCapture.h"
 #include "gkSteeringPathFollowing.h"
 #include "gkSteeringWander.h"
+#include "gkLogicBlockAiManager.cpp"
 
 /*
  gkLogicBlockAiContextImpl - shared data
@@ -256,36 +257,4 @@ void gkSteeringActuator::execute(void)
 		lbmanager->trackLogicBlockAi(aiContext);
 	}
 	aiContext->updateAIDefinition(m_def);
-}
-
-gkLogicBlockAiManager::gkLogicBlockAiManager() {
-
-}
-
-gkLogicBlockAiManager::~gkLogicBlockAiManager() {
-
-}
-void gkLogicBlockAiManager::update(gkScalar tick) {
-	for (int i = 0; i < m_logicBlockAi.size(); ++i) {
-		m_logicBlockAi[i]->update(tick);
-	}
-}
-
-void gkLogicBlockAiManager::trackLogicBlockAi(gkLogicBlockAiContext *logicBlockAi) {
-	m_logicBlockAi.push_back(logicBlockAi);
-}
-
-void gkLogicBlockAiManager::untrackLogicBlockAi(gkLogicBlockAiContext *logicBlockAi) {
-	for (int i = m_logicBlockAi.size()-1; i >= 0 ; --i ) {
-		if (m_logicBlockAi[i] == logicBlockAi) {
-			m_logicBlockAi.erase(m_logicBlockAi.begin() + i);
-		}
-	}
-}
-
-gkLogicBlockAiManager*  gkScene::getLogicBlockAiManager() {
-	if (!m_logicBlockAiManager) {
-		m_logicBlockAiManager = new gkLogicBlockAiManager();
-	}
-	return m_logicBlockAiManager;
 }
