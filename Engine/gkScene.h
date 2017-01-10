@@ -284,7 +284,9 @@ private:
 #ifdef OGREKIT_USE_PROCESSMANAGER
 	gkProcessManager*		m_processManager;
 #endif
+#ifdef OGREKIT_COMPILE_OPENSTEER
 	gkLogicBlockAiManager*  m_logicBlockAiManager;
+#endif
 };
 
 #endif//_gkSceneObject_h_

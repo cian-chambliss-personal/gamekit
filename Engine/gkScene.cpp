@@ -67,7 +67,9 @@
 #include "gkSoundManager.h"
 #endif
 
+#ifdef OGREKIT_COMPILE_OPENSTEER
 #include "gkLogicBlockAiManager.h"
+#endif
 
 #ifdef OGREKIT_USE_LUA
 #include "Script/Lua/gkLuaManager.h"
@@ -121,7 +123,9 @@ gkScene::gkScene(gkInstancedManager* creator, const gkResourceName& name, const 
 #ifdef OGREKIT_USE_PROCESSMANAGER
 		,m_processManager(0)
 #endif
+#ifdef OGREKIT_COMPILE_OPENSTEER
 		, m_logicBlockAiManager(0)
+#endif
 {
 	m_logicBrickManager = new gkLogicManager();
 }
@@ -159,11 +163,13 @@ gkScene::~gkScene()
 	}
 
 	m_objects.clear();
+#ifdef OGREKIT_COMPILE_OPENSTEER
 	if (m_logicBlockAiManager)
 	{
 		delete m_logicBlockAiManager;
 		m_logicBlockAiManager = 0;
 	}
+#endif
 }
 
 
@@ -1710,10 +1716,13 @@ void gkScene::update(gkScalar tickRate)
 		gkStats::getSingleton().stopSoundClock();
 	}
 #endif
+
+#ifdef OGREKIT_COMPILE_OPENSTEER
 	if (m_logicBlockAiManager)
 	{
 		m_logicBlockAiManager->update(tickRate);
 	}
+#endif
 
 	if (m_updateFlags & UF_DBVT)
 	{

@@ -30,9 +30,10 @@
 //#include "gkGameObjectManager.cpp"
 #include "gkSteeringObject.h"
 #include "gkSteeringCapture.h"
+#include "gkSteeringFlee.h"
 #include "gkSteeringPathFollowing.h"
 #include "gkSteeringWander.h"
-#include "gkLogicBlockAiManager.cpp"
+//#include "gkLogicBlockAiManager.cpp"
 
 /*
  gkLogicBlockAiContextImpl - shared data
@@ -65,6 +66,7 @@ public:
 	gkGameObject*     m_trackingObject;
 	gkSteeringObject* m_steeringObject;
 	gkSteeringCapture* m_steeringCapture;
+	gkSteeringFlee *   m_steeringFlee;
 	gkSteeringPathFollowing* m_steeringFollowing;
 	gkSteeringWander* m_steeringWander;
 	gkLogicBlockAiContextImpl();
@@ -100,7 +102,22 @@ void gkLogicBlockAiContextImpl::Seek() {
 }
 
 void gkLogicBlockAiContextImpl::Flee() {
-	Wander(); // TBD -- figure out 'flee'
+	if (!m_steeringFlee) {
+		m_steeringFlee = new gkSteeringFlee(
+			m_trackingObject,
+			m_def.m_velocity,
+			FORWARD,
+			UP,
+			SIDE,
+			m_def.m_targetObj,
+			0.5f,
+			5
+		);
+	}
+	m_steeringFlee->setMaxForce(m_def.m_acceleration);
+	m_steeringFlee->reset();
+	m_steeringFlee->setGoalPosition(m_def.m_targetObj->getPosition());
+	m_steeringObject = m_steeringFlee;
 }
 
 void gkLogicBlockAiContextImpl::PathFollowing() {
@@ -142,11 +159,13 @@ void gkLogicBlockAiContextImpl::Wander() {
 }
 
 gkLogicBlockAiContextImpl::gkLogicBlockAiContextImpl() : m_navMeshData(0), m_navMesh(0), m_trackingObject(0), m_steeringObject(0)
-, m_steeringCapture(0), m_steeringFollowing(0), m_steeringWander(0) {
+, m_steeringCapture(0), m_steeringFlee(0) , m_steeringFollowing(0), m_steeringWander(0) {
 }
 gkLogicBlockAiContextImpl::~gkLogicBlockAiContextImpl() {
 	if (m_steeringCapture)
 		delete m_steeringCapture;
+	if( m_steeringFlee)
+	    delete m_steeringFlee;	
 	if (m_steeringFollowing)
 		delete m_steeringFollowing;
 	if (m_steeringWander)

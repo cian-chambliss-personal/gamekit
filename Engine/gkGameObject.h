@@ -38,8 +38,9 @@
 #include <OgreMovableObject.h>
 
 class gkCurve;
+#if defined(OGREKIT_COMPILE_OPENSTEER)
 class gkLogicBlockAiContext;
-
+#endif
 
 class gkGameObject : public gkInstancedObject
 {
@@ -304,9 +305,10 @@ public:
 
 	void _setBoneTransform(gkTransformState* transform);
 	gkTransformState* _getBoneTransform() { return m_boneTransform; }
-
+#if defined(OGREKIT_COMPILE_OPENSTEER)
 	gkLogicBlockAiContext *_getLogicBlockAiContext() { return m_logicBlockAiContext;  }
 	void _setLogicBlockAiContext(gkLogicBlockAiContext *gsc) { m_logicBlockAiContext = gsc;  }
+#endif
 protected:
 
 
@@ -366,7 +368,9 @@ protected:
 	Animations                  m_actions;
 
 	gkTransformState* m_boneTransform;
+#if defined(OGREKIT_COMPILE_OPENSTEER)
 	gkLogicBlockAiContext *   m_logicBlockAiContext;	
+#endif
 
 	virtual void createInstanceImpl(void);
 	virtual void destroyInstanceImpl(void);

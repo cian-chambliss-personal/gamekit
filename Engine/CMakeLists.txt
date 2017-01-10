@@ -174,6 +174,7 @@ if (OGREKIT_COMPILE_OPENSTEER)
 		AI/gkSteeringPathFollowing.cpp
 		AI/gkSteeringWander.cpp
 		AI/gkSceneObstacle.cpp
+		AI/gkSteeringFlee.cpp
 	)
 	list(APPEND AI_HEADER 
 		AI/gkNavPath.h
@@ -182,6 +183,7 @@ if (OGREKIT_COMPILE_OPENSTEER)
 		AI/gkSteeringPathFollowing.h
 		AI/gkSteeringWander.h
 		AI/gkSceneObstacle.h
+		AI/gkSteeringFlee.h
 	)
 endif()
 
@@ -510,6 +512,7 @@ set(Logic_HEADER
 if (OGREKIT_COMPILE_OPENSTEER)
 	list(APPEND Logic_SOURCE 
 		LogicBricks/gkSteeringActuator.cpp
+		gkLogicBlockAiManager.cpp
 	)
 	list(APPEND Logic_HEADER 
 		LogicBricks/gkSteeringActuator.h
