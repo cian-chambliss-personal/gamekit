@@ -76,7 +76,7 @@ private:
 
 	void addTriangle(const gkVector3& v1, const gkVector3& v2, const gkVector3& v3, int triangleIndex);
 
-	void AddCollisionObj();
+	void AddCollisionObj(bool asTriMesh);
 
 	bool isValid(gkGameObject* pObj);
 

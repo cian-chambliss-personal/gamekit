@@ -135,6 +135,10 @@ void gkLogicBlockAiContextImpl::PathFollowing() {
 		m_steeringFollowing->setNavMesh(m_navMesh);
 	}
 	m_steeringFollowing->setGoalRadius(m_def.m_dist);
+    auto pos = m_trackingObject->getPosition();
+    pos.x -= 5;
+    pos.y -= 5;
+    m_steeringFollowing->setGoalPosition(pos);
 	m_steeringFollowing->setMaxForce(m_def.m_acceleration);
 	m_steeringFollowing->reset();
 	m_steeringObject = m_steeringFollowing;

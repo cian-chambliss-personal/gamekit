@@ -1161,6 +1161,38 @@ btCollisionObject* gkGameObject::getCollisionObject()
 		return 0;
 }
 
+const btCollisionShape*        gkGameObject::getMeshShape() {
+    btCollisionObject* colObj = getCollisionObject();
+    btCollisionShape* shape = NULL;
+    if( colObj ) {
+         shape = colObj->getCollisionShape();
+    }
+    if( !shape || !shape->isConcave()) {
+        // need to create one
+        gkEntity*  entity = getEntity();
+        if( entity ) {
+            gkMesh* mesh = entity->getMesh();
+            if( mesh ) {
+                btTriangleMesh* triMesh = mesh->getTriMesh();
+                if (triMesh->getNumTriangles() > 0)
+                    shape = new btBvhTriangleMeshShape(triMesh, true);
+            }
+        }
+    }
+    return shape;
+}
+
+void                     gkGameObject::releaseMeshShape(const btCollisionShape* shape) {
+    // TBD - if not a collision object - return the shape
+    btCollisionObject* colObj = getCollisionObject();
+    btCollisionShape* cshape = NULL;
+    if( colObj ) {
+        cshape = colObj->getCollisionShape();
+    }
+    if( shape && shape != cshape )
+        delete shape;
+}
+
 
 
 Ogre::AxisAlignedBox gkGameObject::getAabb() const

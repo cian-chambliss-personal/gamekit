@@ -115,7 +115,7 @@ void gkNavMeshData::updateOrCreate(gkGameObject* pObj)
 
 	if (m_object && m_object->isInstanced())
 	{
-		AddCollisionObj();
+		AddCollisionObj(false);
 	}
 
 	m_hasChanged = true;
@@ -128,7 +128,7 @@ void gkNavMeshData::singleNavMeshCreate(gkGameObject* pObj)
 
 	if (m_object && m_object->isInstanced())
 	{
-		AddCollisionObj();
+        AddCollisionObj(true);
 	}
 
 	m_hasChanged = true;
@@ -249,7 +249,7 @@ struct minH : public std::binary_function<gkVector3, gkVector3, bool>
 	bool operator()(const gkVector3& a, const gkVector3& b) const  { return a.y < b.y; }
 };
 
-void gkNavMeshData::AddCollisionObj()
+void gkNavMeshData::AddCollisionObj(bool asTriMesh)
 {
 	gkCriticalSection::Lock guard(m_cs);
 
@@ -268,8 +268,13 @@ void gkNavMeshData::AddCollisionObj()
 
 	btCollisionObject* colObj = m_object->getPhysicsController()->getCollisionObject();
 
-	const btCollisionShape* shape = colObj->getCollisionShape();
-
+	const btCollisionShape* shape = 0;
+    if( asTriMesh ) {
+        shape = m_object->getMeshShape();
+    } else {
+        shape = colObj->getCollisionShape();
+    }
+    
 	m = colObj->getWorldTransform();
 
 	int shapetype = shape->getShapeType();
@@ -335,7 +340,9 @@ void gkNavMeshData::AddCollisionObj()
 
 		break;
 	}
-
+    if( asTriMesh ) {
+        m_object->releaseMeshShape(shape);
+    }
 	if (m_object->getNavData().isEmpty())
 	{
 		size_t n = m_data.tris.size() - tIndex;

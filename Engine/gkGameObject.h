@@ -150,6 +150,8 @@ public:
 	gkPhysicsController*     getPhysicsController(void);
 	btCollisionObject*       getCollisionObject(void);
 
+    const btCollisionShape*        getMeshShape();
+    void                     releaseMeshShape(const btCollisionShape*shape);
 
 	// variables
 

@@ -341,7 +341,7 @@ bool gkRecast::findPath(PDT_NAV_MESH navMesh, const gkVector3& from, const gkVec
 
 			int npolys = navMesh->m_p->findPath(startRef, endRef, startPos.ptr(), endPos.ptr(), &filter, polys.ptr(), maxPathPolys);
 
-			if (npolys > 1)
+			if (npolys > 0)
 			{
 				path.clear();
 
