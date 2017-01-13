@@ -135,10 +135,7 @@ void gkLogicBlockAiContextImpl::PathFollowing() {
 		m_steeringFollowing->setNavMesh(m_navMesh);
 	}
 	m_steeringFollowing->setGoalRadius(m_def.m_dist);
-    auto pos = m_trackingObject->getPosition();
-    pos.x -= 5;
-    pos.y -= 5;
-    m_steeringFollowing->setGoalPosition(pos);
+    m_steeringFollowing->setGoalPosition(m_def.m_targetObj->getPosition());
 	m_steeringFollowing->setMaxForce(m_def.m_acceleration);
 	m_steeringFollowing->reset();
 	m_steeringObject = m_steeringFollowing;
@@ -184,7 +181,7 @@ void gkLogicBlockAiContextImpl::CreateNavMesh(gkGameObject *navMeshObj) {
 }
 
 void gkLogicBlockAiContextImpl::updateAIDefinition(gkLogicBlockAiDefinition &def) {
-	if ( m_def.m_mode != def.m_mode ) {
+	if ( m_def.m_mode != def.m_mode || m_def.m_targetObj !=  def.m_targetObj ) {
 		m_def = def;
 		switch (m_def.m_mode) {
 		case gkLogicBlockAiDefinition::Mode::SA_REST:
@@ -263,7 +260,7 @@ void gkSteeringActuator::execute(void)
 			meshAiContext->CreateNavMesh(m_def.m_navMeshObj);
 		}		
 	}
-	if (!m_def.m_targetObj && (mode == gkLogicBlockAiDefinition::Mode::SA_SEEK || mode == gkLogicBlockAiDefinition::Mode::SA_FLEE) ) {
+	if (!m_def.m_targetObj && (mode == gkLogicBlockAiDefinition::Mode::SA_SEEK || mode == gkLogicBlockAiDefinition::Mode::SA_FLEE || mode == gkLogicBlockAiDefinition::Mode::SA_PATH_FOLLOWING ) ) {
 		m_def.m_targetObj = m_scene->getObject(m_target);
 		if (!m_def.m_targetObj)
 			mode = gkLogicBlockAiDefinition::Mode::SA_REST;
