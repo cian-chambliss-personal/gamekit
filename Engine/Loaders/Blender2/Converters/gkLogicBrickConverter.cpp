@@ -97,7 +97,8 @@ void gkLogicLoader::convertObject(Blender::Object* bobj, gkGameObject* gobj, gkL
 	// FIXME (dertom): Had to set this manually to one. It worked fine on desktop but refused to work
 	// for android. Works fine afais.
 	// orig: lnk->setState(bobj->init_state ? bobj->init_state : bobj->state);
-	lnk->setState(1);
+	//lnk->setState(1);
+    lnk->setState(bobj->init_state ? bobj->init_state : 1); // CSC -  set state to init state OR 1
 	gobj->setState(lnk->getState());
 	lnk->setObject(gobj);
 	gobj->attachLogic(lnk);
