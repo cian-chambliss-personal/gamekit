@@ -33,6 +33,7 @@
 #include "gkSkeleton.h"
 #include "Ogre/gkOgreParticleObject.h"
 #include "gkCurve.h"
+#include "gkFontObject.h"
 
 
 gkGameObjectManager::gkGameObjectManager()
@@ -91,6 +92,13 @@ gkCurve* gkGameObjectManager::createCurve(const gkResourceName& name)
 	return static_cast<gkCurve*>(create(name));
 }
 
+gkFontObject *gkGameObjectManager::createFont(const gkResourceName& name)
+{
+	m_currentType = GK_FONT_OBJECT;
+	return static_cast<gkFontObject*>(create(name));
+}
+
+
 gkGameObject* gkGameObjectManager::getObject(const gkResourceName& name)
 {
 	return getByName<gkGameObject>(name);
@@ -132,6 +140,11 @@ gkCurve* gkGameObjectManager::getCurve(const gkResourceName& name)
 	return ob ? ob->getCurve() : 0;
 }
 
+gkFontObject *gkGameObjectManager::getFont(const gkResourceName& name)
+{
+	gkGameObject* ob = getObject(name);
+	return ob ? ob->getFont() : 0;
+}
 
 gkResource* gkGameObjectManager::createImpl(const gkResourceName& name, const gkResourceHandle& handle)
 {
@@ -148,6 +161,7 @@ gkResource* gkGameObjectManager::createImpl(const gkResourceName& name, const gk
 	case GK_PARTICLES: return new gkOgreParticleObject(this, name, handle);
 #endif
 	case GK_CURVE:	   return new gkCurve(this,name,handle);
+	case GK_FONT_OBJECT: return new gkFontObject(this, name, handle);
 	}
 	return new gkGameObject(this, name, handle);
 }

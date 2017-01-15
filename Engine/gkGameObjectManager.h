@@ -49,6 +49,7 @@ public:
 	gkSkeleton* createSkeleton(const gkResourceName& name);
 	gkParticleObject* createParticleObject(const gkResourceName& name);
 	gkCurve* createCurve(const gkResourceName& name);
+	gkFontObject *createFont(const gkResourceName& name);
 
 	gkGameObject* getObject(const gkResourceName& name);
 	gkLight* getLight(const gkResourceName& name);
@@ -57,6 +58,7 @@ public:
 	gkSkeleton* getSkeleton(const gkResourceName& name);
 	gkParticleObject* getParticleObject(const gkResourceName& name);
 	gkCurve* getCurve(const gkResourceName& name);
+	gkFontObject *getFont(const gkResourceName& name);
 
 private:
 	int m_currentType;

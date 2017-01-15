@@ -73,6 +73,7 @@ private:
 	void convertObjectSkeleton(gkSkeletonResource* gobj, Blender::Object* bobj);
 	void convertObjectParticles(gkGameObject* gobj, Blender::Object* bobj);
 	void convertObjectCurve(gkGameObject* gobj, Blender::Object* bobj);
+	void convertObjectFont(gkGameObject* gobj, Blender::Object* bobj);
 
 
 	Blender::Scene*				m_bscene;

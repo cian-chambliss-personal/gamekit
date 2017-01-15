@@ -67,6 +67,7 @@ bool gkBlenderSceneConverter::validObject(Blender::Object* bobj)
 	case OB_MESH:       // Entity + Mesh
 	case OB_ARMATURE:   // SceneNode + Skeleton
 	case OB_CURVE:		// Curves
+	case OB_FONT:       // Font (Text) Object
 		return true;
 	}
 	return false;
@@ -356,6 +357,7 @@ void gkBlenderSceneConverter::convertObject(Blender::Object* bobj, gkGameObject*
 		case OB_MESH:       gobj = m_gscene->createEntity(name);    break;
 		case OB_ARMATURE:   gobj = m_gscene->createSkeleton(name);  break;
 		case OB_CURVE:      gobj = m_gscene->createCurve(name);     break;
+		case OB_FONT:       gobj = m_gscene->createFont(name);     break;
 		}
 
 	}
@@ -376,11 +378,12 @@ void gkBlenderSceneConverter::convertObject(Blender::Object* bobj, gkGameObject*
 		// object data
 		switch (bobj->type)
 		{
-		case OB_LAMP:       convertObjectLamp(gobj, bobj);        break;
-		case OB_CAMERA:     convertObjectCamera(gobj, bobj);      break;
-		case OB_MESH:       convertObjectMesh(gobj, bobj);        break;
-		case OB_ARMATURE:   convertObjectArmature(gobj, bobj);    break;
-		case OB_CURVE:		convertObjectCurve(gobj, bobj);		  break;
+		case OB_LAMP:        convertObjectLamp(gobj, bobj);        break;
+		case OB_CAMERA:      convertObjectCamera(gobj, bobj);      break;
+		case OB_MESH:        convertObjectMesh(gobj, bobj);        break;
+		case OB_ARMATURE:    convertObjectArmature(gobj, bobj);    break;
+		case OB_CURVE:		 convertObjectCurve(gobj, bobj);		  break;
+		case OB_FONT:        convertObjectFont(gobj, bobj);		  break;
 		}
 
 		convertObjectParticles(gobj, bobj); //need mesh info
@@ -1111,3 +1114,12 @@ void gkBlenderSceneConverter::convertObjectCurve(gkGameObject* gobj, Blender::Ob
 		return;
 	}
 } 
+
+void gkBlenderSceneConverter::convertObjectFont(gkGameObject* gobj, Blender::Object* bobj)
+{
+	Blender::Curve* vtxtdata = static_cast<Blender::Curve*>(bobj->data);
+	gkFontObject* obj = static_cast<gkFontObject*>(gobj);
+	if (vtxtdata->str) {
+		obj->setText(vtxtdata->str);
+    }
+}

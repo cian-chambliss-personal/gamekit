@@ -316,6 +316,19 @@ gkCurve* gkScene::createCurve(const gkHashedString& name) {
 	return gobj;
 }
 
+gkFontObject* gkScene::createFont(const gkHashedString& name) {
+	if (m_objects.find(name) != GK_NPOS)
+	{
+		gkPrintf("Scene: Duplicate object '%s' found\n", name.str().c_str());
+		return 0;
+	}
+
+	gkFontObject* gobj = gkGameObjectManager::getSingleton().createFont(gkResourceName(name, getGroupName()));
+	addObject(gobj);
+	return gobj;
+}
+
+
 gkCamera* gkScene::createCamera(const gkHashedString& name)
 {
 	if (m_objects.find(name) != GK_NPOS)

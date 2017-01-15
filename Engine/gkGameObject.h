@@ -103,6 +103,7 @@ public:
 	GK_INLINE gkSkeleton*       getSkeleton(void)       {return m_type == GK_SKELETON  ? (gkSkeleton*)this : 0; }
 	GK_INLINE gkParticleObject* getParticleObject(void) {return m_type == GK_PARTICLES ? (gkParticleObject*)this : 0; }
 	GK_INLINE gkCurve* 			getCurve(void) 			{return m_type == GK_CURVE 	   ? (gkCurve*)this : 0; }
+	GK_INLINE gkFontObject* 	getFont(void) 			{return m_type == GK_FONT_OBJECT ? (gkFontObject*)this : 0; }
 
 	// Parent / Child access.
 	GK_INLINE bool                      hasParent(void)         {return m_parent != 0;}

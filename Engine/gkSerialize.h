@@ -460,7 +460,8 @@ enum gkGameObjectTypes
 	GK_OBJECT,
 	GK_SKELETON,
 	GK_PARTICLES,
-	GK_CURVE
+	GK_CURVE,
+	GK_FONT_OBJECT
 };
 
 enum gkGameObjectMode

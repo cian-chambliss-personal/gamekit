@@ -70,6 +70,7 @@ class gkInstancedObject;
 class gkCamera;
 class gkEntity;
 class gkLight;
+class gkFontObject;
 class gkBone;
 class gkSkeleton;
 class gkSkeletonResource;

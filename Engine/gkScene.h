@@ -45,6 +45,7 @@
 #endif
 
 class gkCurve;
+class gvFontObject;
 class gkLogicBlockAiManager;
 
 class gkScene : public gkInstancedObject
@@ -108,6 +109,7 @@ public:
 	gkMesh*           createMesh(const gkHashedString& name);
 	gkParticleObject* createParticleObject(const gkHashedString& name);
 	gkCurve*		  createCurve(const gkHashedString& name);
+	gkFontObject*     createFont(const gkHashedString& name);
 
 	gkGameObject*     cloneObject(gkGameObject* obj, int life, bool instantiate = false);
 	void              endObject(gkGameObject* obj);
