@@ -53,6 +53,7 @@
 #include "gkAnimationManager.h"
 #include "gkParticleManager.h"
 #include "gkHUDManager.h"
+#include "gkFontObject.h"
 
 #ifdef OGREKIT_COMPILE_ENET
 #include "Network/gkNetworkManager.h"
@@ -443,6 +444,7 @@ void gkEngine::finalize()
 #endif
 	delete m_private->root;
 	delete m_private;
+	gkFontObject::finalize();
 
 	m_initialized = false;
 }

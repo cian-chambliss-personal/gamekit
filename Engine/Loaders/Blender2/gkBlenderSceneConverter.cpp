@@ -1122,4 +1122,61 @@ void gkBlenderSceneConverter::convertObjectFont(gkGameObject* gobj, Blender::Obj
 	if (vtxtdata->str) {
 		obj->setText(vtxtdata->str);
     }
+	if (vtxtdata->family && *vtxtdata->family ) {
+		obj->setFaceName(vtxtdata->family);
+	}
+	obj->regenerateMesh();
+	/*
+		texflag	1	short
+		drawflag	0	short
+		twist_mode	3	short
+		twist_smooth	0.000000000	float
+		smallcaps_scale	0.750000000	float
+		pathlen	100	int
+		bevresol	0	short
+		totcol	0	short
+		flag	4166	int
+		width	1.00000000	float
+		ext1	0.000000000	float
+		ext2	0.000000000	float
+		resolu	12	short
+		resolv	12	short
+		resolu_ren	0	short
+		resolv_ren	0	short
+		actnu	0	int
+		lastsel	0x00000000	void *
+		len	17	short
+		lines	1	short
+		pos	15	short
+		spacemode	0	short
+		spacing	1.00000000	float
+		linedist	1.00000000	float
+		shear	0.000000000	float
+		fsize	1.00000000	float
+		wordspace	1.00000000	float
+		ulpos	0.000000000	float
+		ulheight	0.0500000007	float
+		xof	0.000000000	float
+		yof	0.000000000	float
+		linewidth	0.000000000	float
++		str	0x097c0180 "Citidel Entracece"	char *
+		selboxes	0x00000000	void *
+		editfont	0x00000000	void *
++		family	0x09bcf2c4 ""	char[24]
++		vfont	0x09bd07d8 {id={next=0x00000000 prev=0x00000000 newid=0x00000000 <NULL> ...} name=0x09bd083c "<builtin>" ...}	Blender::VFont *
++		vfontb	0x09bd07d8 {id={next=0x00000000 prev=0x00000000 newid=0x00000000 <NULL> ...} name=0x09bd083c "<builtin>" ...}	Blender::VFont *
++		vfonti	0x09bd07d8 {id={next=0x00000000 prev=0x00000000 newid=0x00000000 <NULL> ...} name=0x09bd083c "<builtin>" ...}	Blender::VFont *
++		vfontbi	0x09bd07d8 {id={next=0x00000000 prev=0x00000000 newid=0x00000000 <NULL> ...} name=0x09bd083c "<builtin>" ...}	Blender::VFont *
+		sepchar	0	int
+		ctime	0.000000000	float
+		totbox	1	int
+		actbox	1	int
++		tb	0x097bfcc0 {x=0.000000000 y=0.000000000 w=0.000000000 ...}	Blender::TextBox *
+		selstart	0	int
+		selend	0	int
++		strinfo	0x0936f8d8 {kern=0 mat_nr=0 flag=0 '\0' ...}	Blender::CharInfo *
++		curinfo	{kern=0 mat_nr=0 flag=0 '\0' ...}	Blender::CharInfo
+		bevfac1	0.000000000	float
+		bevfac2	1.00000000	float
+*/
 }

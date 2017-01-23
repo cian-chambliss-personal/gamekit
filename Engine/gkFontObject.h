@@ -29,19 +29,24 @@
 #include "gkGameObject.h"
 #include "gkSerialize.h"
 
-
 class gkFontObject : public gkGameObject
 {
 protected:
-	gkString text;
+    gkString text;
+    gkString faceName;
+	gkVector3 right;
+	gkVector3 up;
 public:
 	gkFontObject(gkInstancedManager* creator, const gkResourceName& name, const gkResourceHandle& handle);
 	virtual ~gkFontObject() {}
 	void setText(const gkString& _text);
+    void setFaceName(const gkString& _faceName);
+	void setSize( const gkVector3 &_right , const gkVector3 &_up );
+	void regenerateMesh();
+	static void finalize(void);
 private:
-
 	virtual void createInstanceImpl(void);
-	virtual void destroyInstanceImpl(void);
+	virtual void destroyInstanceImpl(void);	
 };
 
 #endif//_gkFontObject_h_

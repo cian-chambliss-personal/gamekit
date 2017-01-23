@@ -28,11 +28,14 @@
 #include "OgreSceneManager.h"
 #include "OgreSceneNode.h"
 #include "gkScene.h"
-
+#include "gkMesh.h"
+#include "gkTextManager.h"
+#include "gkTextFile.h"
+#include "utSingleton.h"
 
 gkFontObject::gkFontObject(gkInstancedManager* creator, const gkResourceName& name, const gkResourceHandle& handle)
-	:    gkGameObject(creator, name, handle, GK_FONT_OBJECT)
-{
+	: gkGameObject(creator, name, handle, GK_FONT_OBJECT) , right(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0)) , up(Ogre::Real(0), Ogre::Real(0), Ogre::Real(-1))
+{	
 }
 
 
@@ -64,7 +67,235 @@ void gkFontObject::destroyInstanceImpl(void)
 void gkFontObject::setText(const gkString& _text)
 {
 	text = _text;
+	//gkTextFile* tf = gkTextManager::getSingletonPtr() ? (gkTextFile*)gkTextManager::getSingleton().getByName(filename) : 0;
+	//if (tf) 
+	//{
+        // const gkString& buf = tf->getText();
+	//}
 }
 
 
 
+void gkFontObject::setFaceName(const gkString& _faceName)
+{
+    faceName = _faceName;
+}
+
+void gkFontObject::setSize(const gkVector3 &_right, const gkVector3 &_up)
+{
+	right = _right;
+	up = _up;
+}
+class gkFontSpriteChUv
+{
+public:
+	int left;
+	int top;
+	int right;
+	int bottom;
+	gkFontSpriteChUv(int _left, int _top, int _right, int _bottom) : left(_left), top(_top), right(_right), bottom(_bottom)
+	{
+	}
+};
+/*
+ Format...
+ texture:defaultfont.png
+ size:596,290
+ 32:10,10,19,64
+ 33:27,10,40,64
+ ...
+ */
+#define MAXIMUM_PARSE_VALUES 6
+class gkFontSpriteMeshFace
+{
+protected:
+	typedef enum { parseState_none, parseState_size, parseState_texture, parseState_uv } parseState_t;
+	typedef utHashTable<utIntHashKey, gkFontSpriteChUv * >   SpriteFontChUVMap;
+	SpriteFontChUVMap uvs;
+	int width;
+	int height;
+	gkString textName;
+public:
+	gkFontSpriteMeshFace(const gkString& def) :	width(0) , height(0)
+	{
+		const char *str = def.c_str();
+		int i;
+		int start = 0;
+		int chValue = -1;
+		parseState_t state = parseState_none;
+		int nValue = 0;
+		int values[MAXIMUM_PARSE_VALUES+1];
+
+		for (i = 0; str[i]; ++i)
+		{
+			if (str[i] == ':')
+			{
+				int len = (i - start);
+				if (isdigit(str[start]))
+				    {
+					chValue = atoi(str + start);
+					state = parseState_uv;
+					nValue = 0;
+				    }
+				else if ( len >= 4  && memicmp(str + start, "size", 4) == 0) 
+					{
+					state = parseState_size;
+					nValue = 0;
+					}
+			    else if ( len >= 7 && memicmp(str + start, "texture", 7) == 0)
+					{
+					state = parseState_texture;
+					}
+			}
+			else if (str[i] == ',')
+			{
+				if (isdigit(str[start]))
+					{
+					int value = atoi(str + start);
+					if (nValue < MAXIMUM_PARSE_VALUES)
+						{
+						values[nValue++] = value;
+						}
+					}
+				start = i + 1;
+			}
+			else if (str[i] == '\n' || !str[i + 1] )
+			{
+				if (isdigit(str[start]))
+				{
+					int value = atoi(str + start);
+					if (nValue < MAXIMUM_PARSE_VALUES)
+					{
+						values[nValue++] = value;
+					}
+				}
+				switch (state)
+				{
+				case parseState_size:
+					if (nValue >= 2) 
+					{
+						width = values[0];
+						height = values[1];
+					}
+					break;
+				case parseState_texture:
+					{
+						gkString name(str + start, i - start);
+						textName = name;
+					}
+					break;
+				case parseState_uv:
+					if (nValue >= 4)
+					{
+						uvs.insert(utIntHashKey(chValue),new gkFontSpriteChUv(values[0], values[1], values[2], values[3]));
+					}
+					break;
+				}
+				state = parseState_none;
+				start = i + 1;
+			}
+		}
+	}
+	~gkFontSpriteMeshFace()
+	{
+		utHashTableIterator<SpriteFontChUVMap> iter(uvs);
+		while (iter.hasMoreElements())
+		{
+			gkFontSpriteChUv* uvm = iter.getNext().second;
+			delete uvm;
+		}
+		uvs.clear();
+	}
+	gkSubMesh* generateTextSubMesh(const gkString &text, gkVector3 &right, gkVector3 &up)
+	{
+		gkSubMesh*subMesh = 0;
+		// TBD... generate uv mesh for text...
+		return subMesh;
+	}
+};
+
+class gkFontSpriteMeshGenerator : public utSingleton<gkFontSpriteMeshGenerator>
+{
+protected:
+    typedef utHashTable<gkHashedString, gkFontSpriteMeshFace*>   FontSpriteMeshFaceMap;
+    FontSpriteMeshFaceMap spriteFonts;
+public:
+	gkFontSpriteMeshGenerator() 
+	{
+	}
+	virtual ~gkFontSpriteMeshGenerator()
+	{
+		utHashTableIterator<FontSpriteMeshFaceMap> iter(spriteFonts);
+		while (iter.hasMoreElements())
+		{
+			gkFontSpriteMeshFace* smf = iter.getNext().second;
+			delete smf;
+		}
+		spriteFonts.clear();
+	}
+	gkSubMesh* generateTextSubMesh(const gkString &faceName, const gkString &text, gkVector3 &right, gkVector3 &up) 
+	{
+		gkSubMesh* subMesh = 0;
+		gkHashedString key(faceName);
+		UTsize pos = spriteFonts.find(key);
+		gkFontSpriteMeshFace* mf = 0;
+		if (pos != UT_NPOS)
+		{
+			mf = spriteFonts.at(pos);
+		}	
+		if (!mf) 
+			{
+				gkTextFile* tf = 0;
+				if (!faceName.empty())
+				{
+					tf = gkTextManager::getSingletonPtr() ? (gkTextFile*)gkTextManager::getSingleton().getByName(faceName + ".spritefont") : 0;
+				}
+				if (!tf)
+				{
+					tf = gkTextManager::getSingletonPtr() ? (gkTextFile*)gkTextManager::getSingleton().getByName("default.spritefont") : 0;
+				}
+				if (tf)
+				{
+					const gkString& def = tf->getText();
+					mf = new gkFontSpriteMeshFace(def);
+					spriteFonts.insert(key, mf);
+				}
+			}
+		if (subMesh)
+		    {
+			subMesh = mf->generateTextSubMesh(text, right, up);
+		    }
+		return subMesh;
+	}
+	UT_DECLARE_SINGLETON(gkFontSpriteMeshGenerator);
+};
+
+UT_IMPLEMENT_SINGLETON(gkFontSpriteMeshGenerator);
+
+
+void gkFontObject::regenerateMesh()
+{
+	// TBD - lookup 'font' definition
+	gkSubMesh* subMesh = 0;
+	gkFontSpriteMeshGenerator *gks = gkFontSpriteMeshGenerator::getSingletonPtr();
+	if (!gks)
+	{
+		gks = new gkFontSpriteMeshGenerator();
+	}	
+	subMesh = gks->generateTextSubMesh(faceName, text, right, up);
+	if (subMesh) 
+	{
+		delete subMesh;
+	}
+}
+
+
+void gkFontObject::finalize(void)
+{
+	gkFontSpriteMeshGenerator *gks = gkFontSpriteMeshGenerator::getSingletonPtr();
+	if (gks)
+	{
+		delete gks;
+	}
+
+}
