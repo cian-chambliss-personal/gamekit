@@ -31,6 +31,7 @@
 #include "gkMesh.h"
 #include "gkTextManager.h"
 #include "gkTextFile.h"
+#include "gkEntity.h"
 #include "utSingleton.h"
 
 gkFontObject::gkFontObject(gkInstancedManager* creator, const gkResourceName& name, const gkResourceHandle& handle)
@@ -206,9 +207,51 @@ public:
 		}
 		uvs.clear();
 	}
-	gkSubMesh* generateTextSubMesh(const gkString &text, gkVector3 &right, gkVector3 &up)
+	gkSubMesh* generateTextSubMesh(const gkString &text, gkVector3 &start, gkVector3 &right, gkVector3 &up)
 	{
-		gkSubMesh*subMesh = 0;
+		gkSubMesh*subMesh = new gkSubMesh();
+		int offset = 0;
+		for (char ch : text)
+		{
+			UTsize pos = uvs.find(utIntHashKey((int)ch));
+			gkFontSpriteChUv* uv = 0;
+			if (pos != UT_NPOS)
+			{
+			   uv = uvs.at(pos);
+			   float uvleft = (float)uv->left / (float)width;
+			   float uvtop  = (float)uv->top  / (float)height;
+			   float uvright = (float)uv->right / (float)width;
+			   float uvbottom = (float)uv->bottom / (float)height;
+			   gkVertex v0;
+			   gkVertex v1;
+			   gkVertex v2;
+			   gkVertex v3;
+			   v0.uv[0].x = uvleft;
+			   v0.uv[0].y = uvbottom;
+			   v0.co.x = start.x;
+			   v0.co.y = start.y;
+			   v0.co.z = start.z;
+			   v1.uv[0].x = uvleft;
+			   v1.uv[0].y = uvtop;
+			   v1.co.x = start.x+up.x;
+			   v1.co.y = start.y+up.y;
+			   v1.co.z = start.z+up.z;
+			   start += right;
+			   v2.uv[0].x = uvright;
+			   v2.uv[0].y = uvbottom;
+			   v2.co.x = start.x;
+			   v2.co.y = start.y;
+			   v2.co.z = start.z;
+			   v3.uv[0].x = uvright;
+			   v3.uv[0].y = uvtop;
+			   v3.co.x = start.x + up.x;
+			   v3.co.y = start.y + up.y;
+			   v3.co.z = start.z + up.z;
+			   subMesh->addTriangle(v0,offset+0,v1,offset+1,v2,offset+2,0);
+			   subMesh->addTriangle(v3, offset + 3, v2, offset + 2, v1, offset + 1, 0);
+			}
+		}
+
 		// TBD... generate uv mesh for text...
 		return subMesh;
 	}
@@ -233,7 +276,7 @@ public:
 		}
 		spriteFonts.clear();
 	}
-	gkSubMesh* generateTextSubMesh(const gkString &faceName, const gkString &text, gkVector3 &right, gkVector3 &up) 
+	gkSubMesh* generateTextSubMesh(const gkString &faceName, const gkString &text, gkVector3 &start, gkVector3 &right, gkVector3 &up)
 	{
 		gkSubMesh* subMesh = 0;
 		gkHashedString key(faceName);
@@ -261,9 +304,9 @@ public:
 					spriteFonts.insert(key, mf);
 				}
 			}
-		if (subMesh)
+		if (mf)
 		    {
-			subMesh = mf->generateTextSubMesh(text, right, up);
+			subMesh = mf->generateTextSubMesh(text, start, right, up);
 		    }
 		return subMesh;
 	}
@@ -281,11 +324,40 @@ void gkFontObject::regenerateMesh()
 	if (!gks)
 	{
 		gks = new gkFontSpriteMeshGenerator();
-	}	
-	subMesh = gks->generateTextSubMesh(faceName, text, right, up);
+	}
+	gkVector3 start(0, 0, 0);
+	subMesh = gks->generateTextSubMesh(faceName, text,start, right, up);
 	if (subMesh) 
 	{
-		delete subMesh;
+		gkHashedString meshName("mesh_"+m_name.getName()+ "_gen");
+		gkHashedString entName(m_name.getName() + "_gen");
+		gkEntity* ent = m_scene->createEntity(entName);
+		gkMesh* meshPtr = m_scene->createMesh(meshName);
+		if( meshPtr && ent ) 
+		{
+			meshPtr->addSubMesh(subMesh);
+			ent->getEntityProperties().m_mesh = meshPtr;
+			ent->getProperties().m_parent = this->m_name.getName();
+			ent->setActiveLayer((m_scene->getLayer() & getLayer()) != 0);
+			ent->setLayer(getLayer());
+			/*
+			
+			gkMatrix4 omat, pmat;
+
+			ent->getProperties().m_transform.toMatrix(omat);
+			getProperties().m_transform.toMatrix(pmat);
+			omat = pmat.inverse() * omat;
+			gkTransformState st;
+			gkMathUtils::extractTransform(omat, st.loc, st.rot, st.scl);
+			// apply
+			ent->setTransform(st);			
+			*/
+			// if already loaded - need to call  'createInstance()' ;
+		}
+		else 
+		{
+			delete subMesh;
+		}		
 	}
 }
 
