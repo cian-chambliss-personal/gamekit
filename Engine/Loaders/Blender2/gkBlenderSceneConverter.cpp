@@ -1126,6 +1126,25 @@ void gkBlenderSceneConverter::convertObjectFont(gkGameObject* gobj, Blender::Obj
 		obj->setFaceName(vtxtdata->family);
 	}
 	obj->setTextColor(gkColor(bobj->col[0], bobj->col[1], bobj->col[2], bobj->col[3]));
+
+	switch (vtxtdata->spacemode)
+	{
+	case CU_ALIGN_X_LEFT:
+		obj->setXAlign(gkFontObject::AlignX::Left);
+		break;
+	case CU_ALIGN_X_MIDDLE:
+		obj->setXAlign(gkFontObject::AlignX::Middle);
+		break;
+	case CU_ALIGN_X_RIGHT:
+		obj->setXAlign(gkFontObject::AlignX::Right);
+		break;
+	case CU_ALIGN_X_JUSTIFY:
+		obj->setXAlign(gkFontObject::AlignX::Justify);
+		break;
+	case CU_ALIGN_X_FLUSH:
+		obj->setXAlign(gkFontObject::AlignX::Flush);
+		break;
+	}
 	obj->regenerateMesh();
 	/*
 		texflag	1	short

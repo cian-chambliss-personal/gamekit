@@ -4659,6 +4659,20 @@ struct EditNurb
     char pad[4];
 };
 
+// spacemode
+#define	CU_ALIGN_X_LEFT     0
+#define	CU_ALIGN_X_MIDDLE   1
+#define	CU_ALIGN_X_RIGHT    2
+#define	CU_ALIGN_X_JUSTIFY  3
+#define	CU_ALIGN_X_FLUSH    4
+
+
+#define	CU_ALIGN_Y_TOP_BASELINE 0
+#define	CU_ALIGN_Y_TOP          1
+#define	CU_ALIGN_Y_CENTER       2
+#define	CU_ALIGN_Y_BOTTOM       3
+
+
 struct Curve
 {
     ID id;

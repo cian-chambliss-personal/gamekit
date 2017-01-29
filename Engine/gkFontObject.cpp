@@ -34,10 +34,16 @@
 #include "gkEntity.h"
 #include "utSingleton.h"
 
+gkFontObjectSettings::gkFontObjectSettings() 
+	    : right(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0))
+		, up(Ogre::Real(0), Ogre::Real(1), Ogre::Real(0)), lineSpacing(Ogre::Real(0), Ogre::Real(-1), Ogre::Real(0))
+		, textColor(1.f, 1.f, 1.f, 1.f), alignX(gkFontObject::AlignX::Left)
+{
+}
+
+
 gkFontObject::gkFontObject(gkInstancedManager* creator, const gkResourceName& name, const gkResourceHandle& handle)
-	: gkGameObject(creator, name, handle, GK_FONT_OBJECT) , right(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0)) 
-	, up(Ogre::Real(0), Ogre::Real(1), Ogre::Real(0)) , lineSpacing(Ogre::Real(0), Ogre::Real(-1), Ogre::Real(0))
-	, textColor(1.f,1.f,1.f,1.f)
+	: gkGameObject(creator, name, handle, GK_FONT_OBJECT)  
 {	
 }
 
@@ -81,18 +87,24 @@ void gkFontObject::setText(const gkString& _text)
 
 void gkFontObject::setFaceName(const gkString& _faceName)
 {
-    faceName = _faceName;
+    settings.faceName = _faceName;
 }
 
 void gkFontObject::setSize(float charWidth, float charHeight)
 {
-	right = charWidth * gkVector3(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0));
-	up = charHeight * gkVector3(Ogre::Real(0), Ogre::Real(1), Ogre::Real(0));
+	settings.right = charWidth * gkVector3(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0));
+	settings.up = charHeight * gkVector3(Ogre::Real(0), Ogre::Real(1), Ogre::Real(0));
 }
 
 void gkFontObject::setTextColor(gkColor _textColor) {
-	textColor = _textColor;
+	settings.textColor = _textColor;
 }
+
+void gkFontObject::setXAlign(int xAlign)
+{
+	settings.alignX = xAlign;
+}
+
 
 class gkFontSpriteChUv
 {
@@ -217,19 +229,84 @@ public:
 		}
 		uvs.clear();
 	}
-	gkSubMesh* generateTextSubMesh(const gkString &text, gkVector3 &start, gkVector3 &right, gkVector3 &up, gkVector3 &lineSpacing,gkColor &textColor )
+	void GetTextSize(const gkString &text, gkFontObjectSettings &settings,std::vector<float> &widths)
+	{
+		gkVector3 start(0.f, 0.f, 0.f);
+		gkVector3 lineStart = start;
+		float textwidth = 0.f;
+		for (char ch : text)
+		{
+			if (ch == '\n')
+			{
+				lineStart += settings.lineSpacing;
+				start = lineStart;
+				widths.push_back(textwidth);
+				textwidth = 0.f;
+				continue;
+			}
+			UTsize pos = uvs.find(utIntHashKey((int)ch));
+			gkFontSpriteChUv* uv = 0;
+			if (pos != UT_NPOS)
+			{
+				uv = uvs.at(pos);
+				float uvleft = (float)uv->left / (float)width;
+				float uvtop = (float)uv->top / (float)height;
+				float uvright = (float)uv->right / (float)width;
+				float uvbottom = (float)uv->bottom / (float)height;
+				float charWidth = ((uvright - uvleft) * width) / ((uvbottom - uvtop) * height);
+				textwidth += charWidth;
+			}
+		}
+		if (textwidth > 0.f)
+		{
+			widths.push_back(textwidth);
+		}
+	}
+	gkSubMesh* generateTextSubMesh(const gkString &text, gkVector3 &start, gkFontObjectSettings &settings )
 	{
 		gkSubMesh*subMesh = new gkSubMesh();
 		int offset = 0;
-		gkVector3 normal = right;
+		gkVector3 normal = settings.right;
 		int triflag = gkTriangle::TRI_COLLIDER;
 		gkVector3 lineStart = start;
-		normal = normal.crossProduct(up);
+		std::vector<float> widths;
+		int widthIndex = 0;
+		float totalWidth = 0.f;
+		float lineWidth = 0.f;
+
+		normal = normal.crossProduct(settings.up);
+
+		if (settings.alignX != gkFontObject::AlignX::Left) 
+		{
+			GetTextSize(text, settings, widths);			
+			if (widths.size() > 0)
+			{
+				lineWidth = widths[0];
+				for (int i = 0; i < widths.size(); ++i)
+				{
+					if (widths[0] > totalWidth)
+					{
+						totalWidth = widths[0];
+					}
+				}
+				gkVector3 offset = settings.right;
+				offset.normalise();
+				if (settings.alignX == gkFontObject::AlignX::Middle)
+				{
+					start -= (offset * totalWidth) / 2.f;
+				}
+				else
+				{
+					start -= (offset * totalWidth);
+				}
+			}
+		}
+
 		for (char ch : text)
 		{
 			if (ch == '\n') 
 			{
-				lineStart += lineSpacing;
+				lineStart += settings.lineSpacing;
 				start = lineStart;
 				continue;
 			}
@@ -251,9 +328,9 @@ public:
 			   gkVertex v3;
 			   v0.uv[0].x = uvleft;
 			   v0.uv[0].y = uvtop;
-			   v0.co.x = start.x+up.x;
-			   v0.co.y = start.y+up.y;
-			   v0.co.z = start.z+up.z;
+			   v0.co.x = start.x+ settings.up.x;
+			   v0.co.y = start.y+ settings.up.y;
+			   v0.co.z = start.z+ settings.up.z;
 			   v1.no = normal;
 			   v1.uv[0].x = uvleft;
 			   v1.uv[0].y = uvbottom;
@@ -261,7 +338,7 @@ public:
 			   v1.co.y = start.y;
 			   v1.co.z = start.z;
 			   v1.no = normal;
-			   start += right * charWidth;
+			   start += settings.right * charWidth;
 			   v2.uv[0].x = uvright;
 			   v2.uv[0].y = uvbottom;
 			   v2.co.x = start.x;
@@ -270,9 +347,9 @@ public:
 			   v2.no = normal;
 			   v3.uv[0].x = uvright;
 			   v3.uv[0].y = uvtop;
-			   v3.co.x = start.x + up.x;
-			   v3.co.y = start.y + up.y;
-			   v3.co.z = start.z + up.z;
+			   v3.co.x = start.x + settings.up.x;
+			   v3.co.y = start.y + settings.up.y;
+			   v3.co.z = start.z + settings.up.z;
 			   v3.no = normal;
 			   subMesh->addTriangle(v0,offset+0,v1,offset+1,v2,offset+2, triflag);
 			   subMesh->addTriangle(v0, offset + 0, v2, offset + 2, v3, offset + 3, triflag);
@@ -281,17 +358,17 @@ public:
 		subMesh->setTotalLayers(1);
 		gkMaterialProperties&  mat = subMesh->getMaterial();
 		gkString fontColorName;
-		fontColorName = "r"+std::to_string((int)(textColor.r*255.f))+"g"+ std::to_string((int)(textColor.g*255.f)) + "b" + std::to_string((int)(textColor.b*255.f)) + "a" + std::to_string((int)(textColor.a*255.f));
+		fontColorName = "r"+std::to_string((int)(settings.textColor.r*255.f))+"g"+ std::to_string((int)(settings.textColor.g*255.f)) + "b" + std::to_string((int)(settings.textColor.b*255.f)) + "a" + std::to_string((int)(settings.textColor.a*255.f));
 		mat.m_name = "fontmaterial_" + textName + fontColorName;
 		//mat.m_mode = gkMaterialProperties::MA_LIGHTINGENABLED | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_TWOSIDE | gkMaterialProperties::MA_ALPHABLEND | gkMaterialProperties::MA_HASFACETEX;
 		//mat.m_mode = gkMaterialProperties::MA_ALPHABLEND | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_LIGHTINGENABLED;
 		mat.m_mode = gkMaterialProperties::MA_ALPHABLEND | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_LIGHTINGENABLED; // test with no transparency		
-		mat.m_diffuse = textColor;
+		mat.m_diffuse = settings.textColor;
 		mat.m_specular.r = 1;
 		mat.m_specular.g = 1;
 		mat.m_specular.b = 1;
 		mat.m_specular.a = 1;
-		mat.m_specular = textColor;
+		mat.m_specular = settings.textColor;
 		mat.m_emissive = 2.f;
 		mat.m_ambient = 1.f;
 		mat.m_spec = 0.5f;
@@ -329,7 +406,7 @@ public:
 		}
 		spriteFonts.clear();
 	}
-	gkSubMesh* generateTextSubMesh(const gkString &faceName, const gkString &text, gkVector3 &start, gkVector3 &right, gkVector3 &up, gkVector3 &lineSpacing, gkColor &textColor)
+	gkSubMesh* generateTextSubMesh(const gkString &faceName, const gkString &text, gkVector3 &start, gkFontObjectSettings &settings)
 	{
 		gkSubMesh* subMesh = 0;
 		gkHashedString key(faceName);
@@ -359,7 +436,7 @@ public:
 			}
 		if (mf)
 		    {
-			subMesh = mf->generateTextSubMesh(text, start, right, up, lineSpacing,textColor );
+			subMesh = mf->generateTextSubMesh(text, start, settings );
 		    }
 		return subMesh;
 	}
@@ -379,7 +456,7 @@ void gkFontObject::regenerateMesh()
 		gks = new gkFontSpriteMeshGenerator();
 	}
 	gkVector3 start(0, 0, 0);	
-	subMesh = gks->generateTextSubMesh(faceName, text,start, right, up,lineSpacing , textColor );
+	subMesh = gks->generateTextSubMesh(settings.faceName, text,start, settings );
 	if (subMesh) 
 	{
 		gkHashedString meshName("mesh_"+m_name.getName()+ "_gen");
@@ -411,5 +488,4 @@ void gkFontObject::finalize(void)
 	{
 		delete gks;
 	}
-
 }

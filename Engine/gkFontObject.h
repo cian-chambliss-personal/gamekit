@@ -29,18 +29,35 @@
 #include "gkGameObject.h"
 #include "gkSerialize.h"
 
-class gkFontObject : public gkGameObject
+class gkFontObjectSettings
 {
-protected:
-    gkString text;
-    gkString faceName;
+public:
+	gkString faceName;
 	gkVector3 right;
 	gkVector3 up;
 	gkVector3 lineSpacing;
 	gkColor textColor;
+	int alignX;
+	gkFontObjectSettings();
+};
+
+class gkFontObject : public gkGameObject
+{
+protected:
+    gkString text;
+	gkFontObjectSettings settings;
 public:
+	enum AlignX
+	{
+		Left,
+		Right,
+		Middle,
+		Justify,
+		Flush
+	};	
 	gkFontObject(gkInstancedManager* creator, const gkResourceName& name, const gkResourceHandle& handle);
 	virtual ~gkFontObject() {}
+	void setXAlign(int xAlign);
 	void setText(const gkString& _text);
     void setFaceName(const gkString& _faceName);
 	void setSize( float charWidth , float charHeight );
