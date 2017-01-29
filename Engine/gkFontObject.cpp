@@ -35,7 +35,7 @@
 #include "utSingleton.h"
 
 gkFontObject::gkFontObject(gkInstancedManager* creator, const gkResourceName& name, const gkResourceHandle& handle)
-	: gkGameObject(creator, name, handle, GK_FONT_OBJECT) , right(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0)) , up(Ogre::Real(0), Ogre::Real(0), Ogre::Real(-1))
+	: gkGameObject(creator, name, handle, GK_FONT_OBJECT) , right(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0)) , up(Ogre::Real(0), Ogre::Real(1), Ogre::Real(0))
 {	
 }
 
@@ -137,15 +137,18 @@ public:
 					chValue = atoi(str + start);
 					state = parseState_uv;
 					nValue = 0;
+					start = i + 1;
 				    }
 				else if ( len >= 4  && memicmp(str + start, "size", 4) == 0) 
 					{
 					state = parseState_size;
 					nValue = 0;
+					start = i + 1;
 					}
 			    else if ( len >= 7 && memicmp(str + start, "texture", 7) == 0)
 					{
 					state = parseState_texture;
+					start = i + 1;
 					}
 			}
 			else if (str[i] == ',')
@@ -211,6 +214,11 @@ public:
 	{
 		gkSubMesh*subMesh = new gkSubMesh();
 		int offset = 0;
+		gkVector3 normal = right;
+		int triflag = gkTriangle::TRI_COLLIDER;
+		normal = normal.crossProduct(up);
+		//normal = -normal;
+
 		for (char ch : text)
 		{
 			UTsize pos = uvs.find(utIntHashKey((int)ch));
@@ -222,37 +230,84 @@ public:
 			   float uvtop  = (float)uv->top  / (float)height;
 			   float uvright = (float)uv->right / (float)width;
 			   float uvbottom = (float)uv->bottom / (float)height;
+			   float charWidth = ((uvright - uvleft) * width) / ((uvbottom - uvtop) * height);
+			   uvtop = 1.f - uvtop;
+			   uvbottom = 1.f - uvbottom;
 			   gkVertex v0;
 			   gkVertex v1;
 			   gkVertex v2;
 			   gkVertex v3;
 			   v0.uv[0].x = uvleft;
-			   v0.uv[0].y = uvbottom;
-			   v0.co.x = start.x;
-			   v0.co.y = start.y;
-			   v0.co.z = start.z;
+			   v0.uv[0].y = uvtop;
+			   v0.co.x = start.x+up.x;
+			   v0.co.y = start.y+up.y;
+			   v0.co.z = start.z+up.z;
+			   v1.no = normal;
 			   v1.uv[0].x = uvleft;
-			   v1.uv[0].y = uvtop;
-			   v1.co.x = start.x+up.x;
-			   v1.co.y = start.y+up.y;
-			   v1.co.z = start.z+up.z;
-			   start += right;
+			   v1.uv[0].y = uvbottom;
+			   v1.co.x = start.x;
+			   v1.co.y = start.y;
+			   v1.co.z = start.z;
+			   v1.no = normal;
+			   start += right * charWidth;
 			   v2.uv[0].x = uvright;
 			   v2.uv[0].y = uvbottom;
 			   v2.co.x = start.x;
 			   v2.co.y = start.y;
 			   v2.co.z = start.z;
+			   v2.no = normal;
 			   v3.uv[0].x = uvright;
 			   v3.uv[0].y = uvtop;
 			   v3.co.x = start.x + up.x;
 			   v3.co.y = start.y + up.y;
 			   v3.co.z = start.z + up.z;
-			   subMesh->addTriangle(v0,offset+0,v1,offset+1,v2,offset+2,0);
-			   subMesh->addTriangle(v3, offset + 3, v2, offset + 2, v1, offset + 1, 0);
+			   v3.no = normal;
+			   subMesh->addTriangle(v0,offset+0,v1,offset+1,v2,offset+2, triflag);
+			   subMesh->addTriangle(v0, offset + 0, v2, offset + 2, v3, offset + 3, triflag);
 			}
 		}
+		subMesh->setTotalLayers(1);
+		//textName = "bluestone.png";
+		//textName = "colorspace.png";
+		gkMaterialProperties&  mat = subMesh->getMaterial();
+		mat.m_name = "fontmaterial_" + textName;
+		//mat.m_mode = gkMaterialProperties::MA_LIGHTINGENABLED | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_TWOSIDE | gkMaterialProperties::MA_ALPHABLEND | gkMaterialProperties::MA_HASFACETEX;
+		//mat.m_mode = gkMaterialProperties::MA_ALPHABLEND | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_LIGHTINGENABLED;
+		mat.m_mode = gkMaterialProperties::MA_HASFACETEX | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_LIGHTINGENABLED; // test with no transparency		
+		mat.m_diffuse.r = 1;
+		mat.m_diffuse.g = 1;
+		mat.m_diffuse.b = 1;
+		mat.m_diffuse.a = 1;
+		mat.m_specular.r = 1;
+		mat.m_specular.g = 1;
+		mat.m_specular.b = 1;
+		mat.m_specular.a = 1;
+		mat.m_emissive = 2.f;
+		mat.m_ambient = 1.f;
+		mat.m_spec = 0.5f;
+		mat.m_alpha = 1.f;
 
-		// TBD... generate uv mesh for text...
+
+		mat.m_mode = 75;
+		mat.m_rblend = 0;
+		mat.m_hardness = 12.5000000;
+		mat.m_refraction = 0.800000012;
+		mat.m_emissive = 2.00000000;
+		mat.m_ambient = 1.00000000;
+		mat.m_spec = 0.500000000;
+		mat.m_alpha = 1.00000000;
+		mat.m_depthOffset = 0.000000000;
+
+		mat.m_totaltex = 1;
+		gkTextureProperties &tp = mat.m_textures[0];
+		tp.m_name = textName;
+		tp.m_image = textName;
+		tp.m_mix = 1.00000000;
+		tp.m_color = mat.m_diffuse;
+		tp.m_normalFactor = 1.00000000;
+		tp.m_scale.x = 1.0;
+		tp.m_scale.y = 1.0;
+		tp.m_scale.z = 1.0;
 		return subMesh;
 	}
 };
@@ -338,6 +393,8 @@ void gkFontObject::regenerateMesh()
 			meshPtr->addSubMesh(subMesh);
 			ent->getEntityProperties().m_mesh = meshPtr;
 			ent->getProperties().m_parent = this->m_name.getName();
+			//addConstraint			
+			ent->getProperties().m_transform = getProperties().m_transform;
 			ent->setActiveLayer((m_scene->getLayer() & getLayer()) != 0);
 			ent->setLayer(getLayer());
 			/*
