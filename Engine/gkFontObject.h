@@ -36,17 +36,19 @@ protected:
     gkString faceName;
 	gkVector3 right;
 	gkVector3 up;
+	gkVector3 lineSpacing;
+	gkColor textColor;
 public:
 	gkFontObject(gkInstancedManager* creator, const gkResourceName& name, const gkResourceHandle& handle);
 	virtual ~gkFontObject() {}
 	void setText(const gkString& _text);
     void setFaceName(const gkString& _faceName);
-	void setSize( const gkVector3 &_right , const gkVector3 &_up );
+	void setSize( float charWidth , float charHeight );
+	void setTextColor(gkColor _textColor);
 	void regenerateMesh();
 	static void finalize(void);
 private:
 	virtual void createInstanceImpl(void);
 	virtual void destroyInstanceImpl(void);	
 };
-
 #endif//_gkFontObject_h_

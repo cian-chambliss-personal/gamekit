@@ -35,7 +35,9 @@
 #include "utSingleton.h"
 
 gkFontObject::gkFontObject(gkInstancedManager* creator, const gkResourceName& name, const gkResourceHandle& handle)
-	: gkGameObject(creator, name, handle, GK_FONT_OBJECT) , right(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0)) , up(Ogre::Real(0), Ogre::Real(1), Ogre::Real(0))
+	: gkGameObject(creator, name, handle, GK_FONT_OBJECT) , right(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0)) 
+	, up(Ogre::Real(0), Ogre::Real(1), Ogre::Real(0)) , lineSpacing(Ogre::Real(0), Ogre::Real(-1), Ogre::Real(0))
+	, textColor(1.f,1.f,1.f,1.f)
 {	
 }
 
@@ -82,11 +84,16 @@ void gkFontObject::setFaceName(const gkString& _faceName)
     faceName = _faceName;
 }
 
-void gkFontObject::setSize(const gkVector3 &_right, const gkVector3 &_up)
+void gkFontObject::setSize(float charWidth, float charHeight)
 {
-	right = _right;
-	up = _up;
+	right = charWidth * gkVector3(Ogre::Real(1), Ogre::Real(0), Ogre::Real(0));
+	up = charHeight * gkVector3(Ogre::Real(0), Ogre::Real(1), Ogre::Real(0));
 }
+
+void gkFontObject::setTextColor(gkColor _textColor) {
+	textColor = _textColor;
+}
+
 class gkFontSpriteChUv
 {
 public:
@@ -210,17 +217,22 @@ public:
 		}
 		uvs.clear();
 	}
-	gkSubMesh* generateTextSubMesh(const gkString &text, gkVector3 &start, gkVector3 &right, gkVector3 &up)
+	gkSubMesh* generateTextSubMesh(const gkString &text, gkVector3 &start, gkVector3 &right, gkVector3 &up, gkVector3 &lineSpacing,gkColor &textColor )
 	{
 		gkSubMesh*subMesh = new gkSubMesh();
 		int offset = 0;
 		gkVector3 normal = right;
 		int triflag = gkTriangle::TRI_COLLIDER;
+		gkVector3 lineStart = start;
 		normal = normal.crossProduct(up);
-		//normal = -normal;
-
 		for (char ch : text)
 		{
+			if (ch == '\n') 
+			{
+				lineStart += lineSpacing;
+				start = lineStart;
+				continue;
+			}
 			UTsize pos = uvs.find(utIntHashKey((int)ch));
 			gkFontSpriteChUv* uv = 0;
 			if (pos != UT_NPOS)
@@ -267,37 +279,23 @@ public:
 			}
 		}
 		subMesh->setTotalLayers(1);
-		//textName = "bluestone.png";
-		//textName = "colorspace.png";
 		gkMaterialProperties&  mat = subMesh->getMaterial();
-		mat.m_name = "fontmaterial_" + textName;
+		gkString fontColorName;
+		fontColorName = "r"+std::to_string((int)(textColor.r*255.f))+"g"+ std::to_string((int)(textColor.g*255.f)) + "b" + std::to_string((int)(textColor.b*255.f)) + "a" + std::to_string((int)(textColor.a*255.f));
+		mat.m_name = "fontmaterial_" + textName + fontColorName;
 		//mat.m_mode = gkMaterialProperties::MA_LIGHTINGENABLED | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_TWOSIDE | gkMaterialProperties::MA_ALPHABLEND | gkMaterialProperties::MA_HASFACETEX;
 		//mat.m_mode = gkMaterialProperties::MA_ALPHABLEND | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_LIGHTINGENABLED;
-		mat.m_mode = gkMaterialProperties::MA_HASFACETEX | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_LIGHTINGENABLED; // test with no transparency		
-		mat.m_diffuse.r = 1;
-		mat.m_diffuse.g = 1;
-		mat.m_diffuse.b = 1;
-		mat.m_diffuse.a = 1;
+		mat.m_mode = gkMaterialProperties::MA_ALPHABLEND | gkMaterialProperties::MA_DEPTHWRITE | gkMaterialProperties::MA_LIGHTINGENABLED; // test with no transparency		
+		mat.m_diffuse = textColor;
 		mat.m_specular.r = 1;
 		mat.m_specular.g = 1;
 		mat.m_specular.b = 1;
 		mat.m_specular.a = 1;
+		mat.m_specular = textColor;
 		mat.m_emissive = 2.f;
 		mat.m_ambient = 1.f;
 		mat.m_spec = 0.5f;
 		mat.m_alpha = 1.f;
-
-
-		mat.m_mode = 75;
-		mat.m_rblend = 0;
-		mat.m_hardness = 12.5000000;
-		mat.m_refraction = 0.800000012;
-		mat.m_emissive = 2.00000000;
-		mat.m_ambient = 1.00000000;
-		mat.m_spec = 0.500000000;
-		mat.m_alpha = 1.00000000;
-		mat.m_depthOffset = 0.000000000;
-
 		mat.m_totaltex = 1;
 		gkTextureProperties &tp = mat.m_textures[0];
 		tp.m_name = textName;
@@ -331,7 +329,7 @@ public:
 		}
 		spriteFonts.clear();
 	}
-	gkSubMesh* generateTextSubMesh(const gkString &faceName, const gkString &text, gkVector3 &start, gkVector3 &right, gkVector3 &up)
+	gkSubMesh* generateTextSubMesh(const gkString &faceName, const gkString &text, gkVector3 &start, gkVector3 &right, gkVector3 &up, gkVector3 &lineSpacing, gkColor &textColor)
 	{
 		gkSubMesh* subMesh = 0;
 		gkHashedString key(faceName);
@@ -361,7 +359,7 @@ public:
 			}
 		if (mf)
 		    {
-			subMesh = mf->generateTextSubMesh(text, start, right, up);
+			subMesh = mf->generateTextSubMesh(text, start, right, up, lineSpacing,textColor );
 		    }
 		return subMesh;
 	}
@@ -380,8 +378,8 @@ void gkFontObject::regenerateMesh()
 	{
 		gks = new gkFontSpriteMeshGenerator();
 	}
-	gkVector3 start(0, 0, 0);
-	subMesh = gks->generateTextSubMesh(faceName, text,start, right, up);
+	gkVector3 start(0, 0, 0);	
+	subMesh = gks->generateTextSubMesh(faceName, text,start, right, up,lineSpacing , textColor );
 	if (subMesh) 
 	{
 		gkHashedString meshName("mesh_"+m_name.getName()+ "_gen");
@@ -397,19 +395,6 @@ void gkFontObject::regenerateMesh()
 			ent->getProperties().m_transform = getProperties().m_transform;
 			ent->setActiveLayer((m_scene->getLayer() & getLayer()) != 0);
 			ent->setLayer(getLayer());
-			/*
-			
-			gkMatrix4 omat, pmat;
-
-			ent->getProperties().m_transform.toMatrix(omat);
-			getProperties().m_transform.toMatrix(pmat);
-			omat = pmat.inverse() * omat;
-			gkTransformState st;
-			gkMathUtils::extractTransform(omat, st.loc, st.rot, st.scl);
-			// apply
-			ent->setTransform(st);			
-			*/
-			// if already loaded - need to call  'createInstance()' ;
 		}
 		else 
 		{

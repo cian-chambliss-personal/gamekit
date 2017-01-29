@@ -1125,6 +1125,7 @@ void gkBlenderSceneConverter::convertObjectFont(gkGameObject* gobj, Blender::Obj
 	if (vtxtdata->family && *vtxtdata->family ) {
 		obj->setFaceName(vtxtdata->family);
 	}
+	obj->setTextColor(gkColor(bobj->col[0], bobj->col[1], bobj->col[2], bobj->col[3]));
 	obj->regenerateMesh();
 	/*
 		texflag	1	short
@@ -1159,7 +1160,7 @@ void gkBlenderSceneConverter::convertObjectFont(gkGameObject* gobj, Blender::Obj
 		xof	0.000000000	float
 		yof	0.000000000	float
 		linewidth	0.000000000	float
-+		str	0x097c0180 "Citidel Entracece"	char *
++		str	0x097c0180 "Citidel Entrance"	char *
 		selboxes	0x00000000	void *
 		editfont	0x00000000	void *
 +		family	0x09bcf2c4 ""	char[24]
