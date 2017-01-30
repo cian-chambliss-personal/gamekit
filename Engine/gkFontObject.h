@@ -44,6 +44,8 @@ public:
 class gkFontObject : public gkGameObject
 {
 protected:
+	gkVariable *m_textProp;
+	gkEntity* m_textMeshEntity;
     gkString text;
 	gkFontObjectSettings settings;
 public:
@@ -63,6 +65,7 @@ public:
 	void setSize( float charWidth , float charHeight );
 	void setTextColor(gkColor _textColor);
 	void regenerateMesh();
+	virtual void notifyTextPropertyUpdated(void);
 	static void finalize(void);
 private:
 	virtual void createInstanceImpl(void);

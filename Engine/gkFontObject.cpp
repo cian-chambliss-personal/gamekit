@@ -43,7 +43,7 @@ gkFontObjectSettings::gkFontObjectSettings()
 
 
 gkFontObject::gkFontObject(gkInstancedManager* creator, const gkResourceName& name, const gkResourceHandle& handle)
-	: gkGameObject(creator, name, handle, GK_FONT_OBJECT)  
+	: gkGameObject(creator, name, handle, GK_FONT_OBJECT)  , m_textProp(0) , m_textMeshEntity(0)
 {	
 }
 
@@ -51,36 +51,18 @@ gkFontObject::gkFontObject(gkInstancedManager* creator, const gkResourceName& na
 void gkFontObject::createInstanceImpl(void)
 {
 	gkGameObject::createInstanceImpl();
-
-	//Ogre::SceneManager* manager = m_scene->getManager();
-	//m_light = manager->createLight(m_name.getName());
-	//m_node->attachObject(m_light);
 }
 
 
 
 void gkFontObject::destroyInstanceImpl(void)
 {
-	//if (!m_scene->isBeingDestroyed())
-	//{
-	//	Ogre::SceneManager* manager = m_scene->getManager();
-    //
-    //		m_node->detachObject(m_light);
-    //		manager->destroyLight(m_light);
-    //	}
-	//m_light = 0;
-
 	gkGameObject::destroyInstanceImpl();
 }
 
 void gkFontObject::setText(const gkString& _text)
 {
 	text = _text;
-	//gkTextFile* tf = gkTextManager::getSingletonPtr() ? (gkTextFile*)gkTextManager::getSingleton().getByName(filename) : 0;
-	//if (tf) 
-	//{
-        // const gkString& buf = tf->getText();
-	//}
 }
 
 
@@ -445,6 +427,7 @@ public:
 
 UT_IMPLEMENT_SINGLETON(gkFontSpriteMeshGenerator);
 
+#include "gkMeshManager.h"
 
 void gkFontObject::regenerateMesh()
 {
@@ -459,11 +442,24 @@ void gkFontObject::regenerateMesh()
 	subMesh = gks->generateTextSubMesh(settings.faceName, text,start, settings );
 	if (subMesh) 
 	{
-		gkHashedString meshName("mesh_"+m_name.getName()+ "_gen");
+		if (m_textMeshEntity)
+		{			
+			this->removeChild(m_textMeshEntity);
+			gkMesh* meshPtr = m_textMeshEntity->getMesh();
+			if (meshPtr)
+			{
+				gkMeshManager *mgr = gkMeshManager::getSingletonPtr();
+				mgr->destroy(meshPtr);
+			}
+			m_scene->destroyObject(m_textMeshEntity);
+			m_textMeshEntity = 0;
+		}
+		gkHashedString meshName("mesh_" + m_name.getName() + "_gen");
 		gkHashedString entName(m_name.getName() + "_gen");
 		gkEntity* ent = m_scene->createEntity(entName);
 		gkMesh* meshPtr = m_scene->createMesh(meshName);
-		if( meshPtr && ent ) 
+		m_textMeshEntity = ent;
+		if (meshPtr && ent)
 		{
 			meshPtr->addSubMesh(subMesh);
 			ent->getEntityProperties().m_mesh = meshPtr;
@@ -472,15 +468,36 @@ void gkFontObject::regenerateMesh()
 			ent->getProperties().m_transform = getProperties().m_transform;
 			ent->setActiveLayer((m_scene->getLayer() & getLayer()) != 0);
 			ent->setLayer(getLayer());
+			if (isInstanced())
+			{
+				ent->createInstance();
+				//addChild(ent);
+			}
 		}
-		else 
+		else
 		{
 			delete subMesh;
-		}		
+		}
 	}
 }
 
+void gkFontObject::notifyTextPropertyUpdated(void)
+{
+	if (!m_textProp)
+	{
+		m_textProp = getVariable("Text");
+	}
+	if (m_textProp)
+	{
+		gkString newString = m_textProp->getValueString();
+		if (newString.compare(text) != 0)
+		{
+			text = newString;
+			regenerateMesh();
+		}
+	}
 
+}
 void gkFontObject::finalize(void)
 {
 	gkFontSpriteMeshGenerator *gks = gkFontSpriteMeshGenerator::getSingletonPtr();
@@ -489,3 +506,4 @@ void gkFontObject::finalize(void)
 		delete gks;
 	}
 }
+

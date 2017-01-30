@@ -312,6 +312,7 @@ public:
 	gkLogicBlockAiContext *_getLogicBlockAiContext() { return m_logicBlockAiContext;  }
 	void _setLogicBlockAiContext(gkLogicBlockAiContext *gsc) { m_logicBlockAiContext = gsc;  }
 #endif
+	virtual void notifyTextPropertyUpdated(void);
 protected:
 
 
@@ -380,8 +381,6 @@ protected:
 	virtual void postCreateInstanceImpl(void);
 	virtual void postDestroyInstanceImpl(void);
 	virtual void notifyResourceDestroying(void);
-
-
 
 	void sendNotification(const Notifier::Event& e);	
 private:

@@ -31,9 +31,9 @@
 
 
 gkPropertyActuator::gkPropertyActuator(gkGameObject* object, gkLogicLink* link, const gkString& name)
-	:   gkLogicActuator(object, link, name),
-	    m_type(0), m_prop(""), m_value(""), m_othOb(""), m_init(false),
-	    m_cur(0), m_oth(0)
+	: gkLogicActuator(object, link, name),
+	m_type(0), m_prop(""), m_value(""), m_othOb(""), m_init(false),
+	m_cur(0), m_oth(0), m_notifyObject(false)
 {
 }
 
@@ -79,6 +79,11 @@ void gkPropertyActuator::execute(void)
 			else
 				m_propVal.setValue(m_cur->getType(), m_value);
 
+			if (m_prop.compare("Text") == 0 )
+			{
+				m_notifyObject = true;
+			}
+
 			if (m_type == PA_COPY)
 			{
 				if (!m_othOb.empty())
@@ -111,6 +116,10 @@ void gkPropertyActuator::execute(void)
 		case PA_COPY:
 			if (m_oth) m_cur->assign(*m_oth);
 			break;
+		}
+		if (m_notifyObject)
+		{
+			m_object->notifyTextPropertyUpdated();
 		}
 	}
 

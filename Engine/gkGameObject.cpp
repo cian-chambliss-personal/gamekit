@@ -1239,6 +1239,9 @@ void gkGameObject::notifyResourceDestroying(void)
 	sendNotification(Notifier::DESTROYING);
 }
 
+void gkGameObject::notifyTextPropertyUpdated(void)
+{
+}
 
 void gkGameObject::addEventListener(gkGameObject::Notifier* evt)
 {

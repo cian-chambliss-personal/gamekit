@@ -48,6 +48,7 @@ private:
 	int         m_type;
 	gkString    m_prop, m_value, m_othOb;
 	bool        m_init;
+	bool        m_notifyObject;
 	gkVariable*  m_cur, *m_oth;
 	gkVariable  m_propVal;
 
